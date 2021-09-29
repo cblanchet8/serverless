@@ -28,25 +28,49 @@ provider:
         
 # Create one function here 
 functions:
-  api:
+  getUsers:
     handler: api.main
     events:
       - http:
           path: users
           method: GET
           cors: true
+    environment: 
+      TABLE_NAME: ${self:custom.DynamoDBTableName}
+
+  createUser:
+    handler: api.main
+    events:
       - http:
           path: users
           method: POST
           cors: true
+    environment: 
+      TABLE_NAME: ${self:custom.DynamoDBTableName}
+      
+  getUser:
+    handler: api.main
+    events:
       - http:
           path: users/{id}
           method: GET
           cors: true
+    environment: 
+      TABLE_NAME: ${self:custom.DynamoDBTableName}
+
+  updateUser:
+    handler: api.main
+    events:
       - http:
           path: users/{id}
           method: PUT
           cors: true
+    environment: 
+      TABLE_NAME: ${self:custom.DynamoDBTableName}
+
+  deleteUser:
+    handler: api.main
+    events:
       - http:
           path: users/{id}
           method: DELETE
@@ -81,4 +105,3 @@ resources:
 
 
 
-        
