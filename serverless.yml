@@ -1,0 +1,84 @@
+# Assign service and app 
+service: sra-backend
+app: serverless-backend
+configValidationMode: error
+
+# load plug-ins
+plugins:
+  - "@serverless/enterprise-plugin"
+  - serverless-pseudo-parameters
+# Setup runtime environment
+provider:
+  name: aws
+  runtime: nodejs12.x
+  profile: ${opt:profile, "serverless-tutorial"}
+  region: ${opt:region, "us-east-1"}
+  stage: ${opt:stage, "dev"}  # sls deploy --stage test 
+  lambdaHashingVersion: 20201221
+  # Setup IAM Role 
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+        - dynamodb:DeleteItem
+        - dynamodb:Scan
+        - dynamodb:UpdateItem
+      Resource: arn:aws:dynamodb:${self:provider.region}:#{AWS::AccountId}:table/${self:custom.DynamoDBTableName}
+        
+# Create one function here 
+functions:
+  api:
+    handler: api.main
+    events:
+      - http:
+          path: users
+          method: GET
+          cors: true
+      - http:
+          path: users
+          method: POST
+          cors: true
+      - http:
+          path: users/{id}
+          method: GET
+          cors: true
+      - http:
+          path: users/{id}
+          method: PUT
+          cors: true
+      - http:
+          path: users/{id}
+          method: DELETE
+          cors: true
+    environment: 
+      TABLE_NAME: ${self:custom.DynamoDBTableName}
+
+# Add custom names here
+custom:
+  DynamoDBTableName: ${self:service}-users-table-${self:provider.stage} # sra-backend-user-table-dev
+
+# Making DynamoDB table
+resources:
+  Resources:
+    myDynamoDBTable: 
+      Type: AWS::DynamoDB::Table
+      Properties: 
+        AttributeDefinitions: 
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema: 
+          - AttributeName: user_id
+            KeyType: "HASH"
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:custom.DynamoDBTableName}
+
+
+
+
+
+
+
+
+
+        
